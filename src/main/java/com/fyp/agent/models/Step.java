@@ -6,6 +6,8 @@ public class Step {
 	
 	private String xpath;
 	
+	private String value;
+	
 	private int keycode;
 
 	public String getType() {
@@ -30,6 +32,14 @@ public class Step {
 
 	public void setKeycode(int keycode) {
 		this.keycode = keycode;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 }
