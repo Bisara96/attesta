@@ -1,9 +1,9 @@
 package com.fyp.agent.handlers;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -16,17 +16,24 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.fyp.agent.models.ParsedStep;
+import com.fyp.agent.dbhandlers.RecordDBHandler;
 import com.fyp.agent.models.Step;
+import com.fyp.agent.models.UserStory;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class RecordHandler {
 
 	WebDriver driver = null;
+	RecordDBHandler recordDBH = null;
 
 	public RecordHandler() {
+		recordDBH = new RecordDBHandler();
 	}
 
-	public String startRecording(String url) throws MalformedURLException {
+	public String startRecording(String url, int id) throws MalformedURLException {
+		
+		System.out.println("Initializing record of "+url);
 		
 		final DesiredCapabilities capability = DesiredCapabilities.chrome();
 		ChromeOptions options = new ChromeOptions();
@@ -40,66 +47,66 @@ public class RecordHandler {
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		
 		js.executeScript("console.log('hiiiiiiiii')");
-		js.executeScript("window.postMessage({ type: 'startRecording' }, '*');");
+		js.executeScript("window.postMessage({ type: 'startRecording', id: "+id+" }, '*');");
 		//		driver.quit();
-
-		return "Recorded at " + url;
+		
+		UserStory story = recordDBH.getUserStory(id);
+		story.setUrl(url);
+		recordDBH.updateUserStory(story);
+		return "Recording "+id+" at "+ url;
 	}
 
-	public List<ParsedStep> parseSteps(List<Step> rawSteps) throws MalformedURLException {
+	public String parseSteps(List<Step> rawSteps,int id) throws MalformedURLException {
 		System.out.println("Found " + rawSteps.size() + " steps");
-		List<ParsedStep> parsedSteps = new ArrayList<ParsedStep>();
-		for (Step step : rawSteps) {
-			System.out.println(step.getType() + " " + step.getXpath());
-			if (step.getType().equalsIgnoreCase("click")) {
-				ParsedStep pStep = new ParsedStep();
-				pStep.setType(step.getType());
-				pStep.setXpath(step.getXpath());
-				parsedSteps.add(pStep);
-			} else if (step.getType().equalsIgnoreCase("type")){
-				ParsedStep pStep = new ParsedStep();
-				pStep.setType(step.getType());
-				pStep.setXpath(step.getXpath());
-				pStep.setValue(step.getValue());
-				parsedSteps.add(pStep);
-			}
-		}
-
-		return executeParsedSteps(parsedSteps);
-
+		UserStory story = recordDBH.getUserStory(id);
+		story.setStepsJson(new Gson().toJson(rawSteps));
+		recordDBH.updateUserStory(story);
+//		executeParsedSteps(rawSteps);
+		return new Gson().toJson(rawSteps).toString();
 	}
 
-	public List<ParsedStep> executeParsedSteps(List<ParsedStep> parsedSteps) throws MalformedURLException {
+	public String executeParsedSteps(int id) throws MalformedURLException {
 		
-		final DesiredCapabilities capability = DesiredCapabilities.chrome();
-		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--start-maximized");
-		capability.setCapability(ChromeOptions.CAPABILITY, options);
-
-		driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
-		driver.get("https://www.google.lk/?gws_rd=ssl");
-		
-		for (ParsedStep step : parsedSteps) {
+		UserStory story = recordDBH.getUserStory(id);
+		String url = story.getUrl();
+		String jsonString = story.getStepsJson();
+		if(jsonString != null && url != null) {
 			
-			try {
-				WebElement element = driver.findElement(By.xpath(step.getXpath()));
-				if (step.getType().equalsIgnoreCase("click")) {
-					System.out.println("Executing step : Click on " + step.getXpath());
-					element.click();
-				} else if (step.getType().equalsIgnoreCase("type")) {
-					System.out.println("Executing step : Type "+step.getValue()+" on " + step.getXpath());
-					element.sendKeys(step.getValue());
-				} else {
-					System.out.println("Executing step : press "+step.getKeyCode()+" on " + step.getXpath());
-					element.sendKeys(getKeyFromkeyCode(step.getKeyCode()));
+			Type listType = new TypeToken<List<Step>>(){}.getType();
+			List<Step> steps = new Gson().fromJson(jsonString, listType);
+			
+			final DesiredCapabilities capability = DesiredCapabilities.chrome();
+			ChromeOptions options = new ChromeOptions();
+			options.addArguments("--start-maximized");
+			capability.setCapability(ChromeOptions.CAPABILITY, options);
+
+			driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
+			driver.get(url);
+			
+			for (Step step : steps) {
+				
+				try {
+					WebElement element = driver.findElement(By.xpath(step.getXpath()));
+					if (step.getType().equalsIgnoreCase("click")) {
+						System.out.println("Executing step : Click on " + step.getXpath());
+						element.click();
+					} else if (step.getType().equalsIgnoreCase("type")) {
+						System.out.println("Executing step : Type "+step.getValue()+" on " + step.getXpath());
+						element.sendKeys(step.getValue());
+					} else {
+						System.out.println("Executing step : press "+step.getKeycode()+" on " + step.getXpath());
+						element.sendKeys(getKeyFromkeyCode(step.getKeycode()));
+					}
+				} catch (ElementNotVisibleException e) {
+					System.out.println("Couldnt find the element!. Step failed, moving onto the next step.");
+					continue;
 				}
-			} catch (ElementNotVisibleException e) {
-				System.out.println("Couldnt find the element!. Step failed, moving onto the next step.");
-				continue;
 			}
+			return jsonString;			
+		} else {
+			return "Steps not recorded yet";
 		}
 
-		return parsedSteps;
 	}
 
 	private Keys getKeyFromkeyCode(int keyCode) {
