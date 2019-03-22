@@ -16,7 +16,7 @@ public class UserStory {
 	
 	private String url;
 	
-	private String keywords;
+	private String acceptanceCriteria;
 	
 	private void UserStory() {
 	}
@@ -64,12 +64,12 @@ public class UserStory {
 		this.url = url;
 	}
 
-	public String getKeywords() {
-		return keywords;
+	public String getAcceptanceCriteria() {
+		return acceptanceCriteria;
 	}
 
-	public void setKeywords(String keywords) {
-		this.keywords = keywords;
+	public void setAcceptanceCriteria(String acceptanceCriteria) {
+		this.acceptanceCriteria = acceptanceCriteria;
 	}
 	
 	

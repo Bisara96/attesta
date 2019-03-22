@@ -9,6 +9,8 @@ public class Step {
 	private String value;
 	
 	private int keycode;
+	
+	private String keywords;
 
 	public String getType() {
 		return type;
@@ -40,6 +42,14 @@ public class Step {
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
 
 }

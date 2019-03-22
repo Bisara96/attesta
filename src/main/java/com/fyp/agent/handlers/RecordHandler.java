@@ -1,6 +1,5 @@
 package com.fyp.agent.handlers;
 
-import java.io.File;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,7 +15,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.fyp.agent.dbhandlers.RecordDBHandler;
+import com.fyp.agent.dbhandlers.UserStoryDBHandler;
 import com.fyp.agent.models.Step;
 import com.fyp.agent.models.UserStory;
 import com.google.gson.Gson;
@@ -25,20 +24,21 @@ import com.google.gson.reflect.TypeToken;
 public class RecordHandler {
 
 	WebDriver driver = null;
-	RecordDBHandler recordDBH = null;
+	UserStoryDBHandler ustoryDBH = null;
 
 	public RecordHandler() {
-		recordDBH = new RecordDBHandler();
+		ustoryDBH = new UserStoryDBHandler();
 	}
 
 	public String startRecording(String url, int id) throws MalformedURLException {
 		
-		System.out.println("Initializing record of "+url);
+		System.out.println("Initializing record of "+id+" at "+url);
 		
 		final DesiredCapabilities capability = DesiredCapabilities.chrome();
 		ChromeOptions options = new ChromeOptions();
+		options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile");
 		options.addArguments("--start-maximized");
-		options.addExtensions(new File("D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Projects\\test-step-recorder-chrome-ext.crx"));
+//		options.addExtensions(new File("D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Projects\\test-step-recorder-chrome-ext.crx"));
 		capability.setCapability(ChromeOptions.CAPABILITY, options);
 
 		driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
@@ -50,24 +50,25 @@ public class RecordHandler {
 		js.executeScript("window.postMessage({ type: 'startRecording', id: "+id+" }, '*');");
 		//		driver.quit();
 		
-		UserStory story = recordDBH.getUserStory(id);
+		UserStory story = ustoryDBH.getUserStory(id);
 		story.setUrl(url);
-		recordDBH.updateUserStory(story);
+		ustoryDBH.updateUserStory(story);
 		return "Recording "+id+" at "+ url;
 	}
 
 	public String parseSteps(List<Step> rawSteps,int id) throws MalformedURLException {
+		driver.quit();
 		System.out.println("Found " + rawSteps.size() + " steps");
-		UserStory story = recordDBH.getUserStory(id);
+		UserStory story = ustoryDBH.getUserStory(id);
 		story.setStepsJson(new Gson().toJson(rawSteps));
-		recordDBH.updateUserStory(story);
+		ustoryDBH.updateUserStory(story);
 //		executeParsedSteps(rawSteps);
 		return new Gson().toJson(rawSteps).toString();
 	}
 
 	public String executeParsedSteps(int id) throws MalformedURLException {
 		
-		UserStory story = recordDBH.getUserStory(id);
+		UserStory story = ustoryDBH.getUserStory(id);
 		String url = story.getUrl();
 		String jsonString = story.getStepsJson();
 		if(jsonString != null && url != null) {
@@ -77,6 +78,7 @@ public class RecordHandler {
 			
 			final DesiredCapabilities capability = DesiredCapabilities.chrome();
 			ChromeOptions options = new ChromeOptions();
+			options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
 			options.addArguments("--start-maximized");
 			capability.setCapability(ChromeOptions.CAPABILITY, options);
 
