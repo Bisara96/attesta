@@ -10,30 +10,13 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 import com.fyp.agent.models.UserStory;
 
-public class UserStoryFactory {
-	protected SessionFactory sessionFactory;
+public class UserStoryFactory extends DBFactory {
+	
 	
 	public UserStoryFactory() {
-		setup();
+		super();
 	}
-	
-	public void setup() {
-		final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-		        .configure() // configures settings from hibernate.cfg.xml
-		        .build();
-		try {
-		    sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
-		} catch (Exception ex) {
-			System.out.println("Problem creating session factory");
-		     ex.printStackTrace();
-		    StandardServiceRegistryBuilder.destroy(registry);
-		}
-	}
-	
-	public void exit() {
-		sessionFactory.close();
-	}
-	
+
 	public void create(UserStory ustory) {
 	    Session session = sessionFactory.openSession();
 	    session.beginTransaction();

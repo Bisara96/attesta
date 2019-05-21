@@ -16,5 +16,9 @@ public class UserStoryHandler {
 	public List<UserStory> readAllUserStories() {
 		return uDBHandler.getAll();
 	}
+	
+	public UserStory readUserStory(int id) {
+		return uDBHandler.getUserStory(id);
+	}
 
 }

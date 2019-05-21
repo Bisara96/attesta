@@ -6,24 +6,17 @@ import javax.persistence.*;
 @Table(name = "userstory")
 public class UserStory {
 	
+	@Id
+	@Column(name = "userstory_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	private String description;
 
 	private String status;
 	
-	private String stepsJson;
-	
 	private String url;
 	
-	private String acceptanceCriteria;
-	
-	private void UserStory() {
-	}
-	
-	@Id
-	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public int getId() {
 		return id;
 	}
@@ -48,28 +41,12 @@ public class UserStory {
 		this.status = status;
 	}
 
-	public String getStepsJson() {
-		return stepsJson;
-	}
-
-	public void setStepsJson(String stepsJson) {
-		this.stepsJson = stepsJson;
-	}
-
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getAcceptanceCriteria() {
-		return acceptanceCriteria;
-	}
-
-	public void setAcceptanceCriteria(String acceptanceCriteria) {
-		this.acceptanceCriteria = acceptanceCriteria;
 	}
 	
 	

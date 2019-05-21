@@ -12,6 +12,13 @@
     <property name="show_sql">true</property>
         
     <mapping class="com.fyp.agent.models.UserStory" />
+    <mapping class="com.fyp.agent.models.UIObject" />
+    <mapping class="com.fyp.agent.models.TestStep" />
+    <mapping class="com.fyp.agent.models.TypeStep" />
+    <mapping class="com.fyp.agent.models.ClickStep" />
+    <mapping class="com.fyp.agent.models.PressKeyStep" />
+    <mapping class="com.fyp.agent.models.SelectStep" />
+    <mapping class="com.fyp.agent.models.AcceptanceCriteria" />
      
   </session-factory>
 </hibernate-configuration>
