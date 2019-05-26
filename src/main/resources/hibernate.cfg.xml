@@ -19,6 +19,12 @@
     <mapping class="com.fyp.agent.models.PressKeyStep" />
     <mapping class="com.fyp.agent.models.SelectStep" />
     <mapping class="com.fyp.agent.models.AcceptanceCriteria" />
+    <mapping class="com.fyp.agent.models.UserStorySteps" />
+    <mapping class="com.fyp.agent.models.TestCase" />
+    <mapping class="com.fyp.agent.models.TestCaseSteps" />
+    <mapping class="com.fyp.agent.models.Project" />
+    <mapping class="com.fyp.agent.models.Sprint" />
+
      
   </session-factory>
 </hibernate-configuration>

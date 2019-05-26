@@ -9,6 +9,9 @@ public class SelectStep extends TestStep {
 	
 	private String selectedOption;
 
+	public SelectStep() {
+	}
+
 	public SelectStep(TestStepTypes stepType, String screenshot, UIObject uiObject, String selectedOption) {
 		super(stepType, screenshot, uiObject);
 		this.selectedOption = selectedOption;

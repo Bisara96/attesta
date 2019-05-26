@@ -2,6 +2,7 @@ package com.fyp.agent.sessionfactory;
 
 import java.util.List;
 
+import com.fyp.agent.models.Sprint;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
@@ -9,6 +10,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 import com.fyp.agent.models.UserStory;
+import org.hibernate.query.Query;
 
 public class UserStoryFactory extends DBFactory {
 	
@@ -17,12 +19,13 @@ public class UserStoryFactory extends DBFactory {
 		super();
 	}
 
-	public void create(UserStory ustory) {
+	public UserStory create(UserStory ustory) {
 	    Session session = sessionFactory.openSession();
 	    session.beginTransaction();
 	    session.save(ustory);	 
 	    session.getTransaction().commit();
 	    session.close();
+	    return ustory;
 	}
 	
 	public UserStory read(int ustoryId) {
@@ -45,6 +48,18 @@ public class UserStoryFactory extends DBFactory {
 	    
 	    session.close();
 	    return ustoryList;
+	}
+
+	public List<UserStory> getSprintStories(int sprintID) {
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+
+		Query query = session.createQuery("FROM UserStory WHERE sprint_id = :sprint_id");
+		query.setParameter("sprint_id", sprintID);
+		List<UserStory> storyList = query.getResultList();
+
+		session.close();
+		return storyList;
 	}
 	
 	public void update(UserStory ustory) {

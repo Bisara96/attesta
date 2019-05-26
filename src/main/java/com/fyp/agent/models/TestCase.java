@@ -1,39 +1,68 @@
 package com.fyp.agent.models;
 
+import javax.persistence.*;
 import java.util.List;
 
+@Entity
+@Table(name = "testcase")
 public class TestCase {
 
-	private int testcase_id;
-	private String testcaseName;
+	@Id
+	@Column(name = "testcase_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	private String no;
+	private String title;
+
+	@ManyToOne
+	@JoinColumn(name = "userstory_id", nullable = false)
 	private UserStory uStory;
+
+	@ManyToOne
+	@JoinColumn(name = "ac_id", nullable = false)
 	private AcceptanceCriteria acceptanceCriteria;
-	private List<TestStep> testSteps;
-	
-	public TestCase(int testcase_id, String testcaseName, UserStory uStory, AcceptanceCriteria acceptanceCriteria,
-			List<TestStep> testSteps) {
-		super();
-		this.testcase_id = testcase_id;
-		this.testcaseName = testcaseName;
+
+	private String expectedResult;
+
+	private String dateGenerated;
+	private String lastExecutedDate;
+
+	private Boolean active = Boolean.TRUE;
+
+	public TestCase() {
+	}
+
+	public TestCase(String no, String title, UserStory uStory, AcceptanceCriteria acceptanceCriteria, String expectedResult, String dateGenerated) {
+		this.no = no;
+		this.title = title;
 		this.uStory = uStory;
 		this.acceptanceCriteria = acceptanceCriteria;
-		this.testSteps = testSteps;
+		this.dateGenerated = dateGenerated;
+		this.expectedResult = expectedResult;
 	}
 
-	public int getTestcase_id() {
-		return testcase_id;
+	public int getId() {
+		return id;
 	}
 
-	public void setTestcase_id(int testcase_id) {
-		this.testcase_id = testcase_id;
+	public void setId(int id) {
+		this.id = id;
 	}
 
-	public String getTestcaseName() {
-		return testcaseName;
+	public String getNo() {
+		return no;
 	}
 
-	public void setTestcaseName(String testcaseName) {
-		this.testcaseName = testcaseName;
+	public void setNo(String no) {
+		this.no = no;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public UserStory getuStory() {
@@ -52,16 +81,35 @@ public class TestCase {
 		this.acceptanceCriteria = acceptanceCriteria;
 	}
 
-	public List<TestStep> getTestSteps() {
-		return testSteps;
+	public String getDateGenerated() {
+		return dateGenerated;
 	}
 
-	public void setTestSteps(List<TestStep> testSteps) {
-		this.testSteps = testSteps;
+	public void setDateGenerated(String dateGenerated) {
+		this.dateGenerated = dateGenerated;
 	}
-	
-	
-	
-	
 
+	public String getLastExecutedDate() {
+		return lastExecutedDate;
+	}
+
+	public void setLastExecutedDate(String lastExecutedDate) {
+		this.lastExecutedDate = lastExecutedDate;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public String getExpectedResult() {
+		return expectedResult;
+	}
+
+	public void setExpectedResult(String expectedResult) {
+		this.expectedResult = expectedResult;
+	}
 }

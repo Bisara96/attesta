@@ -1,13 +1,13 @@
 package com.fyp.agent.dbhandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.fyp.agent.models.AcceptanceCriteria;
-import com.fyp.agent.models.TestStep;
-import com.fyp.agent.models.UIObject;
+import com.fyp.agent.models.*;
 import com.fyp.agent.sessionfactory.AcceptanceCriteriaFactory;
 import com.fyp.agent.sessionfactory.TestStepFactory;
 import com.fyp.agent.sessionfactory.UIObjectFactory;
+import com.fyp.agent.sessionfactory.UStoryStepFactory;
 
 public class RecordDBHandler {
 	
@@ -24,12 +24,25 @@ public class RecordDBHandler {
 		tStepFactory.exit();
 		return id;
 	}
-	
-	public List<AcceptanceCriteria> getStoryACriteria(int userStoryID) {
-		AcceptanceCriteriaFactory acFactory = new AcceptanceCriteriaFactory();
-		List<AcceptanceCriteria> acList = acFactory.getStoryAcceptanceCriteria(userStoryID);
-		acFactory.exit();
-		return acList;
+
+	public int addUStoryStep(UserStorySteps uStep) {
+		UStoryStepFactory usStepFactory = new UStoryStepFactory();
+		int id = usStepFactory.create(uStep);
+		usStepFactory.exit();
+		return id;
+	}
+
+	public int getStorySteps(int userStoryID) {
+		UStoryStepFactory usStepFactory = new UStoryStepFactory();
+		List<UserStorySteps> stepList = usStepFactory.getStorySteps(userStoryID);
+		usStepFactory.exit();
+		return stepList.size();
+	}
+
+	public void dropExisitingMapping(int id) {
+		UStoryStepFactory usStepFactory = new UStoryStepFactory();
+		usStepFactory.dropExisitingMapping(id);
+		usStepFactory.exit();
 	}
 
 }

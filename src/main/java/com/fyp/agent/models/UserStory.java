@@ -16,7 +16,21 @@ public class UserStory {
 	private String status;
 	
 	private String url;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "sprint_id", nullable = false)
+	private Sprint sprint;
+
+	public UserStory() {
+	}
+
+	public UserStory(String description, String status, String url, Sprint sprint) {
+		this.description = description;
+		this.status = status;
+		this.url = url;
+		this.sprint = sprint;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -48,7 +62,12 @@ public class UserStory {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	
 
+	public Sprint getSprint() {
+		return sprint;
+	}
+
+	public void setSprint(Sprint sprint) {
+		this.sprint = sprint;
+	}
 }

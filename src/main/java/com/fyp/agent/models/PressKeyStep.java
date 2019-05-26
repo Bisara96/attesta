@@ -9,6 +9,9 @@ public class PressKeyStep extends TestStep {
 	
 	private int keyCode;
 
+	public PressKeyStep() {
+	}
+
 	public PressKeyStep(TestStepTypes stepType, String screenshot, UIObject uiObject, int keyCode) {
 		super(stepType, screenshot, uiObject);
 		this.keyCode = keyCode;

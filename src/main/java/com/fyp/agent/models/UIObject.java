@@ -29,11 +29,12 @@ public class UIObject {
 	private String placeholder;
 	
 	private String elementID;
-	
-	
+
+	public UIObject() {
+	}
 
 	public UIObject(String name, String tagName, String label, String xpath, String innerText, String placeholder,
-			String elementID) {
+					String elementID) {
 		super();
 		this.name = name;
 		this.tagName = tagName;

@@ -9,7 +9,10 @@ public class ClickStep extends TestStep {
 
 	private int x;
 	private int y;
-	
+
+	public ClickStep() {
+	}
+
 	public ClickStep(TestStepTypes stepType, String screenshot, UIObject uiObject, int x, int y) {
 		super(stepType, screenshot, uiObject);
 		this.x = x;

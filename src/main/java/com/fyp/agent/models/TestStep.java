@@ -26,8 +26,11 @@ public class TestStep {
 	@ManyToOne
     @JoinColumn(name = "uiobject_id", nullable = false)
 	private UIObject uiObject;
-	
-	public TestStep(TestStepTypes stepType, String screenshot, UIObject uiObject) {
+
+    public TestStep() {
+    }
+
+    public TestStep(TestStepTypes stepType, String screenshot, UIObject uiObject) {
 		super();
 		this.stepType = stepType.name();
 		this.screenshot = screenshot;

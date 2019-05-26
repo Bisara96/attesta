@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.fyp.agent.models.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,16 +22,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fyp.agent.dbhandlers.RecordDBHandler;
 import com.fyp.agent.dbhandlers.UserStoryDBHandler;
-import com.fyp.agent.models.AcceptanceCriteria;
-import com.fyp.agent.models.ClickStep;
-import com.fyp.agent.models.PressKeyStep;
-import com.fyp.agent.models.SelectStep;
-import com.fyp.agent.models.TestCase;
-import com.fyp.agent.models.TestStep;
-import com.fyp.agent.models.TestStepTypes;
-import com.fyp.agent.models.TypeStep;
-import com.fyp.agent.models.UIObject;
-import com.fyp.agent.models.UserStory;
 
 public class RecordHandler {
 
@@ -46,6 +37,8 @@ public class RecordHandler {
     }
 
     public String startRecording(String url, int id) throws MalformedURLException {
+
+        recordDBH.dropExisitingMapping(id);
 
         System.out.println("Initializing record of " + id + " at " + url);
 
@@ -72,6 +65,7 @@ public class RecordHandler {
     public String parseSteps(JSONObject json) throws MalformedURLException, JSONException {
 //		driver.quit();
         int storyID = json.getInt("id");
+        UserStory story = ustoryDBH.getUserStory(storyID);
         JSONArray stepsArray = json.getJSONArray("steps");
         List<TestStep> testStepList = new ArrayList<TestStep>();
 
@@ -97,89 +91,50 @@ public class RecordHandler {
                 case TYPE:
                     TestStep typeStep = new TypeStep(TestStepTypes.TYPE, step.getString("screenshot"), uiObj,
                             step.getString("value"));
-                    typeStep.setId(recordDBH.addTestStep(typeStep));
+                    typeStep.setId(addStoryStep(typeStep, story));
                     testStepList.add(typeStep);
                     break;
                 case CLICK:
-                    TestStep clickStep = new ClickStep(TestStepTypes.TYPE, step.getString("screenshot"), uiObj,
+                    TestStep clickStep = new ClickStep(TestStepTypes.CLICK, step.getString("screenshot"), uiObj,
                             step.getInt("x"), step.getInt("x"));
-                    clickStep.setId(recordDBH.addTestStep(clickStep));
+                    clickStep.setId(addStoryStep(clickStep, story));
                     testStepList.add(clickStep);
                     break;
                 case PRESS:
-                    TestStep pressKeyStep = new PressKeyStep(TestStepTypes.TYPE, step.getString("screenshot"), uiObj,
+                    TestStep pressKeyStep = new PressKeyStep(TestStepTypes.PRESS, step.getString("screenshot"), uiObj,
                             step.getInt("keyCode"));
-                    pressKeyStep.setId(recordDBH.addTestStep(pressKeyStep));
+                    pressKeyStep.setId(addStoryStep(pressKeyStep, story));
                     testStepList.add(pressKeyStep);
                     break;
                 case SELECT:
-                    TestStep selectStep = new SelectStep(TestStepTypes.TYPE, step.getString("screenshot"), uiObj,
+                    TestStep selectStep = new SelectStep(TestStepTypes.SELECT, step.getString("screenshot"), uiObj,
                             step.getString("selectedOption"));
-                    selectStep.setId(recordDBH.addTestStep(selectStep));
+                    selectStep.setId(addStoryStep(selectStep, story));
                     testStepList.add(selectStep);
                     break;
                 default:
                     break;
             }
         }
-        generateTestCases(storyID, testStepList);
+//        generateTestCases(storyID, testStepList);
+        TestCaseHandler hand = new TestCaseHandler();
+        hand.generateTestCases(storyID);
         return stepsArray.toString();
 
     }
 
-    public void generateTestCases(int id, List<TestStep> testSteps) {
-        List<AcceptanceCriteria> acList = recordDBH.getStoryACriteria(id);
-        String[] rulesList = getRulesOfAcceptanceCriteria(acList);
-        for (int i = 0; i < acList.size(); i++) {
-            switch (rulesList[i]) {
-                case "REQUIRED":
-                    List<TestStep> requiredSteps = testSteps;
-                    int[] tsIndexls = getTestStep(acList.get(i).getAcceptanceCriteria(), testSteps);
-                    for (int index : tsIndexls) {
-                        requiredSteps.remove(index);
-                    }
-                    break;
-                case "MinCharacters":
-                    break;
-                case "Data":
-                    break;
-                case "Type":
-                    break;
-                case "Dropdown":
-                    break;
-            }
-        }
+    public Boolean checkStatus(int id) {
+        return recordDBH.getStorySteps(id) == 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    @SuppressWarnings("unchecked")
-    public int[] getTestStep(String criteria, List<TestStep> testSteps) {
-        String[] words = {"username", "password"};
-        int[] tsIndex = new int[words.length];
-        for (int x = 0; x < words.length; x++) {
-            int maxScore = 0;
-            int maxIndex = -999;
-            int curIndex = 0;
-            for (TestStep ts : testSteps) {
-                curIndex++;
-                UIObject uiObj = ts.getUiObject();
-                ObjectMapper oMapper = new ObjectMapper();
-                Map<String, String> map = oMapper.convertValue(uiObj, Map.class);
-                Iterator<Entry<String, String>> objIt = map.entrySet().iterator();
-                int score = 0;
-                while (objIt.hasNext()) {
-                    if (objIt.next().getValue().equalsIgnoreCase(words[x])) {
-                        score = +1;
-                    }
-                }
-                if (maxScore < score) {
-                    maxScore = score;
-                    maxIndex = curIndex;
-                }
-            }
-            tsIndex[x] = maxIndex;
-        }
-        return tsIndex;
+    private int addStoryStep(TestStep step,UserStory ustory) {
+        int testStepID = recordDBH.addTestStep(step);
+        step.setId(testStepID);
+        recordDBH.addUStoryStep(new UserStorySteps(ustory, step));
+        return testStepID;
     }
+
+
 
 //	public String executeParsedSteps(int id) throws MalformedURLException {
 //		
@@ -234,26 +189,5 @@ public class RecordHandler {
 //		}
 //
 //	}
-
-    private String[] getRulesOfAcceptanceCriteria(List<AcceptanceCriteria> acList) {
-        String[] rulesArray = new String[10];
-        return rulesArray;
-    }
-
-    private Keys getKeyFromkeyCode(int keyCode) {
-        switch (keyCode) {
-            case 8:
-                return Keys.BACK_SPACE;
-            case 9:
-                return Keys.TAB;
-            case 13:
-                return Keys.ENTER;
-            case 16:
-                return Keys.SHIFT;
-            case 17:
-                return Keys.CONTROL;
-        }
-        return null;
-    }
 
 }

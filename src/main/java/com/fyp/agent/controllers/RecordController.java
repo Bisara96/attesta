@@ -44,6 +44,11 @@ public class RecordController {
 			return e.getMessage();
 		}
 	}
+
+    @GetMapping("/status")
+    private Boolean getStatus(@RequestParam(name="id", required=true, defaultValue="1") int id) {
+        return handler.checkStatus(id);
+    }
 	
 //	@GetMapping("/play")
 //	private String play(@RequestParam(name="id", required=true, defaultValue="1") int id) {

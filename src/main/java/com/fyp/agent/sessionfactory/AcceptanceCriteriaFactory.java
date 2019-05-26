@@ -65,4 +65,11 @@ public class AcceptanceCriteriaFactory extends DBFactory {
 	    session.close();
 	}
 
+//	public static void main(String[] args) {
+//		AcceptanceCriteriaFactory manager = new AcceptanceCriteriaFactory();
+//	    manager.setup();
+//		List<AcceptanceCriteria> acptCriteriaList = manager.getStoryAcceptanceCriteria(1);
+//	    manager.exit();
+//	}
+
 }

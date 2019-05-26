@@ -24,6 +24,14 @@ public class AcceptanceCriteria {
 	
 	private String criteria;
 
+    public AcceptanceCriteria() {
+    }
+
+	public AcceptanceCriteria(UserStory userStory, String criteria) {
+		this.userStory = userStory;
+		this.criteria = criteria;
+	}
+
 	public int getId() {
 		return id;
 	}

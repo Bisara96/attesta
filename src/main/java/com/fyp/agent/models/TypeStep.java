@@ -6,8 +6,10 @@ import javax.persistence.Entity;
 @Entity
 @DiscriminatorValue("TYPE")
 public class TypeStep extends TestStep {
-	
+
 	private String value;
+
+	public TypeStep(){}
 
 	public TypeStep(TestStepTypes stepType, String screenshot, UIObject uiObject, String value) {
 		super(stepType, screenshot, uiObject);

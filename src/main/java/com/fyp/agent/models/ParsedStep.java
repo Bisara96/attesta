@@ -10,6 +10,8 @@ public class ParsedStep {
 	
 	private int keyCode;
 
+
+
 	public String getType() {
 		return type;
 	}
