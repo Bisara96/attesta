@@ -5,6 +5,7 @@ import com.fyp.agent.dbhandlers.TestCaseDBHandler;
 import com.fyp.agent.dbhandlers.UserStoryDBHandler;
 import com.fyp.agent.models.*;
 import com.fyp.agent.sessionfactory.TestCaseStepsFactory;
+import com.fyp.agent.utilities.WordsToNumbersUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -127,7 +128,7 @@ public class TestCaseHandler {
                     wordCount = 0;
                     for (int index : tsIndexls) {
                         List<TestStep> mcTestSteps = new ArrayList<>(testSteps);
-                        int val = Integer.parseInt(acList.get(i).getAcceptanceCriteria().replaceAll("\\D+",""));
+                        int val = getNumbersInString(acList.get(i).getAcceptanceCriteria());
 
                         tc = new TestCase("tc_"+tc_no, val+" character string is entered for "+words[wordCount],story, acList.get(i), "PASS", getDateNow());
                         tcs.add(tc);
@@ -178,6 +179,19 @@ public class TestCaseHandler {
         }
         return null;
     }
+
+    private int getNumbersInString(String str) {
+        int number = -9999;
+        number = Integer.parseInt(str.replaceAll("\\D+",""));
+
+        if(number == -9999){
+            WordsToNumbersUtil wordsUtil = new WordsToNumbersUtil();
+            str = wordsUtil.convertTextualNumbersInDocument(str);
+            number = Integer.parseInt(str.replaceAll("\\D+",""));
+        }
+        return number;
+    }
+
     private String randomString(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 + "abcdefghijklmnopqrstuvwxyz"
