@@ -1,10 +1,7 @@
 package com.fyp.agent.dbhandlers;
 
 import com.fyp.agent.models.*;
-import com.fyp.agent.sessionfactory.AcceptanceCriteriaFactory;
-import com.fyp.agent.sessionfactory.TestCaseFactory;
-import com.fyp.agent.sessionfactory.TestCaseStepsFactory;
-import com.fyp.agent.sessionfactory.UStoryStepFactory;
+import com.fyp.agent.sessionfactory.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,5 +64,25 @@ public class TestCaseDBHandler {
         List<TestCaseSteps> tcs = testCaseFactory.getTestCaseSteps(id);
         testCaseFactory.exit();
         return tcs;
+    }
+
+    public void updateTestCase(TestCase testCase){
+        TestCaseFactory testCaseFactory = new TestCaseFactory();
+        testCaseFactory.update(testCase);
+        testCaseFactory.exit();
+    }
+
+    public List<TestCaseResult> getTestCaseLastResult(int id) {
+        TestCaseResultFactory tcResultFactory = new TestCaseResultFactory();
+        List<TestCaseResult> result = tcResultFactory.getLastResult(id);
+        tcResultFactory.exit();
+        return result;
+    }
+
+    public int addTestStep(TestStep tStep) {
+        TestStepFactory tStepFactory = new TestStepFactory();
+        int id = tStepFactory.create(tStep);
+        tStepFactory.exit();
+        return id;
     }
 }

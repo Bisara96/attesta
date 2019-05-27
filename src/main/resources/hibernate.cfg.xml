@@ -24,6 +24,8 @@
     <mapping class="com.fyp.agent.models.TestCaseSteps" />
     <mapping class="com.fyp.agent.models.Project" />
     <mapping class="com.fyp.agent.models.Sprint" />
+    <mapping class="com.fyp.agent.models.TestCaseResult" />
+    <mapping class="com.fyp.agent.models.TestStepResult" />
 
      
   </session-factory>

@@ -37,7 +37,7 @@ public class TestCaseFactory extends DBFactory {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        Query query = session.createQuery("FROM TestCase WHERE userstory_id = :userstory_id AND active = TRUE");
+        Query query = session.createQuery("FROM TestCase WHERE userstory_id = :userstory_id AND active = TRUE ORDER BY testcase_id ASC");
         query.setParameter("userstory_id", storyID);
         List<TestCase> storyTestCases = query.getResultList();
 

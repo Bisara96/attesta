@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestCaseHandler {
 
@@ -45,6 +46,26 @@ public class TestCaseHandler {
         return testCaseDBH.getTestCaseSteps(id);
     }
 
+    public List<TestCaseResult> getTCLastResult(int id) {
+        return testCaseDBH.getTestCaseLastResult(id);
+    }
+
+    public List<TestCaseResult> getStoryTestCases_Result(int id){
+        List<TestCase> testCases = testCaseDBH.getStoryTestCases(id);
+        List<TestCaseResult> results = new ArrayList<TestCaseResult>();
+        for (TestCase tc: testCases) {
+//            results.add().get(0));
+        }
+
+        return results;
+    }
+
+    private String getDateNow() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
     public String generateTestCases(int id) {
         UserStory story = uDBHandler.getUserStory(id);
         List<TestStep> testSteps = testCaseDBH.getStorySteps(id);
@@ -58,14 +79,33 @@ public class TestCaseHandler {
 
         for (int i = 0; i < acList.size(); i++) {
 
+            String[] words;
+            int wordCount = 0;
+
             switch (rulesList[i].toUpperCase()) {
                 case "REQUIRED":
-                    tsIndexls = getTestSteps(acList.get(i).getAcceptanceCriteria(), testSteps);
+                    words = criteriaElements(acList.get(i).getAcceptanceCriteria());
+                    tsIndexls = getTestSteps(acList.get(i).getAcceptanceCriteria(), testSteps, words);
+                    wordCount = 0;
                     for (int index : tsIndexls) {
                         List<TestStep> requiredSteps = new ArrayList<>(testSteps);
                         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         Date date = new Date();
-                        tc = new TestCase("tc_"+tc_no, testSteps.get(index).getUiObject().getName()+" is not entered",story, acList.get(i), "FAIL", dateFormat.format(date));
+
+                        tc = new TestCase("tc_"+tc_no, words[wordCount]+" is entered",story, acList.get(i), "PASS", getDateNow());
+                        tcs.add(tc);
+                        tc.setId(testCaseDBH.addTestCase(tc));
+                        tc_no++;
+
+                        for(TestStep ts : requiredSteps){
+                            TestCaseSteps tcSteps = new TestCaseSteps(tc, ts, "PASS");
+                            testCaseDBH.addTestCaseStep(tcSteps);
+                        }
+
+                        tc.setScreenshot(requiredSteps.get(requiredSteps.size()-1).getScreenshot());
+                        testCaseDBH.updateTestCase(tc);
+
+                        tc = new TestCase("tc_"+tc_no, words[wordCount]+" is not entered",story, acList.get(i), "FAIL", getDateNow());
                         tcs.add(tc);
                         tc.setId(testCaseDBH.addTestCase(tc));
                         tc_no++;
@@ -74,16 +114,58 @@ public class TestCaseHandler {
                             TestCaseSteps tcSteps = new TestCaseSteps(tc, ts, "PASS");
                             testCaseDBH.addTestCaseStep(tcSteps);
                         }
+                        tc.setScreenshot(requiredSteps.get(requiredSteps.size()-1).getScreenshot());
+                        testCaseDBH.updateTestCase(tc);
+
+                        wordCount++;
                     }
                     break;
                 case "MINCHARACTERS":
-                    tsIndexls = getTestSteps(acList.get(i).getAcceptanceCriteria(), testSteps);
+                    words = criteriaElements(acList.get(i).getAcceptanceCriteria());
+                    String testString = "testString";
+                    tsIndexls = getTestSteps(acList.get(i).getAcceptanceCriteria(), testSteps, words);
+                    wordCount = 0;
                     for (int index : tsIndexls) {
                         List<TestStep> mcTestSteps = new ArrayList<>(testSteps);
                         int val = Integer.parseInt(acList.get(i).getAcceptanceCriteria().replaceAll("\\D+",""));
-                        TypeStep ts = (TypeStep) mcTestSteps.get(index);
-                        ts.setValue(ts.getValue().substring(0,val));
-                        mcTestSteps.set(index, ts);
+
+                        tc = new TestCase("tc_"+tc_no, val+" character string is entered for "+words[wordCount],story, acList.get(i), "PASS", getDateNow());
+                        tcs.add(tc);
+                        tc.setId(testCaseDBH.addTestCase(tc));
+                        tc_no++;
+
+                        for(int x = 0; x < mcTestSteps.size();x++){
+                            if(x == index && mcTestSteps.get(x).getStepType() == TestStepTypes.TYPE) {
+                                ((TypeStep) mcTestSteps.get(x)).setValue(randomString(val));
+                                mcTestSteps.get(x).setId(testCaseDBH.addTestStep(mcTestSteps.get(x)));
+                            }
+                            TestCaseSteps tcSteps = new TestCaseSteps(tc, mcTestSteps.get(x), "PASS");
+                            testCaseDBH.addTestCaseStep(tcSteps);
+                        }
+
+                        tc.setScreenshot(mcTestSteps.get(mcTestSteps.size()-1).getScreenshot());
+                        testCaseDBH.updateTestCase(tc);
+
+                        val = val - 1;
+
+                        tc = new TestCase("tc_"+tc_no, val+" character string is entered for "+words[wordCount],story, acList.get(i), "FAIL", getDateNow());
+                        tcs.add(tc);
+                        tc.setId(testCaseDBH.addTestCase(tc));
+                        tc_no++;
+
+                        for(int x = 0; x < mcTestSteps.size();x++){
+                            if(x == index && mcTestSteps.get(x).getStepType() == TestStepTypes.TYPE) {
+                                ((TypeStep) mcTestSteps.get(x)).setValue(randomString(val));
+                                mcTestSteps.get(x).setId(testCaseDBH.addTestStep(mcTestSteps.get(x)));
+                            }
+                            TestCaseSteps tcSteps = new TestCaseSteps(tc, mcTestSteps.get(x), "PASS");
+                            testCaseDBH.addTestCaseStep(tcSteps);
+                        }
+
+                        tc.setScreenshot(mcTestSteps.get(mcTestSteps.size()-1).getScreenshot());
+                        testCaseDBH.updateTestCase(tc);
+
+                        wordCount++;
                     }
                     break;
                 case "Data":
@@ -96,7 +178,16 @@ public class TestCaseHandler {
         }
         return null;
     }
+    private String randomString(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "abcdefghijklmnopqrstuvwxyz"
+                + "0123456789";
+        String str = new Random().ints(length, 0, chars.length())
+                .mapToObj(i -> "" + chars.charAt(i))
+                .collect(Collectors.joining());
 
+        return str;
+    }
     private String[] getRulesOfAcceptanceCriteria(List<AcceptanceCriteria> acList) {
         String[] rulesArray = new String[acList.size()];
 
@@ -129,8 +220,7 @@ public class TestCaseHandler {
         return rulesArray;
     }
 
-    public int[] getTestSteps(String criteria, List<TestStep> testSteps) {
-        String[] words = criteriaElements(criteria);
+    public int[] getTestSteps(String criteria, List<TestStep> testSteps, String[] words) {
         int[] tsIndex = new int[words.length];
         for (int x = 0; x < words.length; x++) {
             int maxScore = 0;

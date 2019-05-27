@@ -63,7 +63,7 @@ public class RecordHandler {
     }
 
     public String parseSteps(JSONObject json) throws MalformedURLException, JSONException {
-//		driver.quit();
+		driver.quit();
         int storyID = json.getInt("id");
         UserStory story = ustoryDBH.getUserStory(storyID);
         JSONArray stepsArray = json.getJSONArray("steps");

@@ -27,6 +27,8 @@ public class TestCase {
 	private String dateGenerated;
 	private String lastExecutedDate;
 
+	private String screenshot;
+
 	private Boolean active = Boolean.TRUE;
 
 	public TestCase() {
@@ -111,5 +113,13 @@ public class TestCase {
 
 	public void setExpectedResult(String expectedResult) {
 		this.expectedResult = expectedResult;
+	}
+
+	public String getScreenshot() {
+		return screenshot;
+	}
+
+	public void setScreenshot(String screenshot) {
+		this.screenshot = screenshot;
 	}
 }

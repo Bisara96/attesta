@@ -17,9 +17,9 @@ public class ExecutionController {
     }
 
     @GetMapping("/execute_tc")
-    private String excuteTestCase(@RequestParam(name="id", required=true, defaultValue="1") int tc_id) {
+    private String excuteTestCase(@RequestParam(name="id", required=true, defaultValue="1") int id) {
         try {
-            return handler.executeTestCase(tc_id);
+            return handler.getTestCaseToExecute(id);
         } catch (MalformedURLException e) {
             return e.getMessage();
         }
