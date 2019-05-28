@@ -13,13 +13,13 @@ public class SprintFactory extends DBFactory {
         super();
     }
 
-    public int create(Sprint sprint) {
+    public Sprint create(Sprint sprint) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         session.save(sprint);
         session.getTransaction().commit();
         session.close();
-        return sprint.getId();
+        return sprint;
     }
 
     public Sprint read(int sprintId) {

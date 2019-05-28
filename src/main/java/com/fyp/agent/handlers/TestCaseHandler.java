@@ -92,8 +92,7 @@ public class TestCaseHandler {
                         List<TestStep> requiredSteps = new ArrayList<>(testSteps);
                         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         Date date = new Date();
-
-                        tc = new TestCase("tc_"+tc_no, words[wordCount]+" is entered",story, acList.get(i), "PASS", getDateNow());
+                        tc = new TestCase("tc_"+tc_no, getRequiredTCTitle(requiredSteps.get(index).getStepType(),words[wordCount],true),story, acList.get(i), "PASS", getDateNow());
                         tcs.add(tc);
                         tc.setId(testCaseDBH.addTestCase(tc));
                         tc_no++;
@@ -106,7 +105,7 @@ public class TestCaseHandler {
                         tc.setScreenshot(requiredSteps.get(requiredSteps.size()-1).getScreenshot());
                         testCaseDBH.updateTestCase(tc);
 
-                        tc = new TestCase("tc_"+tc_no, words[wordCount]+" is not entered",story, acList.get(i), "FAIL", getDateNow());
+                        tc = new TestCase("tc_"+tc_no, getRequiredTCTitle(requiredSteps.get(index).getStepType(),words[wordCount],false),story, acList.get(i), "FAIL", getDateNow());
                         tcs.add(tc);
                         tc.setId(testCaseDBH.addTestCase(tc));
                         tc_no++;
@@ -178,6 +177,22 @@ public class TestCaseHandler {
             }
         }
         return null;
+    }
+    
+    private String getRequiredTCTitle(TestStepTypes type, String element, Boolean isAdded) {
+//    	String title = requiredSteps.get(index).getStepType() == TestStepTypes.SELECT ? words[wordCount]+" is selected" : words[wordCount]+" is entered";
+    	
+    	switch(type) {
+    	
+    	case TYPE:
+    		return isAdded ? element+" is entered" : element+" is not entered";
+    	case SELECT:
+    		return isAdded ? element+" is selected" : element+" is not selected";
+    	case CLICK:
+    		return isAdded ? element+" is clicked" : element+" is not clicked";
+    	
+    	}
+    	return "";
     }
 
     private int getNumbersInString(String str) {
@@ -268,6 +283,8 @@ public class TestCaseHandler {
     }
 
     private int noOfSimilarCharacters(String element, String attr){
+        element = element.toLowerCase();
+        attr = attr.toLowerCase();
         int count = 0;
         for(int i = 0; i < element.length() && i < attr.length(); i++) {
             if(element.charAt(i) == attr.charAt(i)){

@@ -81,4 +81,18 @@ public class UserStoryDBHandler {
 		acFactory.exit();
 	}
 
+	public Sprint newSprint(Sprint sprint) {
+		SprintFactory sprintFactory = new SprintFactory();
+		Sprint newSprint = sprintFactory.create(sprint);
+		sprintFactory.exit();
+		return newSprint;
+	}
+
+	public Project getProject(int id) {
+		ProjectFactory projectFactory = new ProjectFactory();
+		Project proj = projectFactory.read(id);
+		projectFactory.exit();
+		return proj;
+	}
+
 }

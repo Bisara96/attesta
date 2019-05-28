@@ -35,6 +35,14 @@ public class UserStoryHandler {
 		return uDBHandler.getAllProjects();
 	}
 
+	public Sprint addSprint(int id) {
+		Project proj = uDBHandler.getProject(id);
+		List<Sprint> ls = uDBHandler.getProjectSprints(id);
+		int no = ls.size() == 0 ? 1 : ls.size();
+		Sprint sprint = new Sprint("Sprint "+no,proj);
+		return uDBHandler.newSprint(sprint);
+	}
+
 	public List<Sprint> readAllSprints() {
 		return uDBHandler.getAllSprints();
 	}

@@ -41,7 +41,7 @@ public class ExecutionHandler {
         for(TestCase tc : testCases){
             executeTestCase(tc);
         }
-        return "Broo did you see that?";
+        return "excuted";
     }
 
     public void openChrome(String url) throws MalformedURLException {
@@ -59,7 +59,7 @@ public class ExecutionHandler {
 
         TestCase testCase = executionDBH.getTestCase(id);
         executeTestCase(testCase);
-        return "Okayy";
+        return "testcase_found";
     }
 
     private String getDateNow() {
@@ -146,7 +146,7 @@ public class ExecutionHandler {
                 tsResult.setScreenshot(base64);
                 executionDBH.createTestStepResult(tsResult);
                 lastScreenShot = base64;
-                System.out.println(base64);
+//                System.out.println(base64);
 
             } catch (ElementNotVisibleException e) {
                 System.out.println("Couldnt find the element!. Step failed, moving onto the next step.");

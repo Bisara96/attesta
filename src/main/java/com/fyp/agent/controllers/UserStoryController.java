@@ -62,6 +62,11 @@ public class UserStoryController {
 		}
 	}
 
+	@GetMapping("/add_sprint")
+	private Sprint addSprint(@RequestParam(name = "id", required = true, defaultValue = "1") int id) {
+		return uStoryHandler.addSprint(id);
+	}
+
 }
 
 
