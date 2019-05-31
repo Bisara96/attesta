@@ -68,39 +68,44 @@ public class ExecutionHandler {
         return dateFormat.format(date);
     }
 
-    public String executeTestCase(TestCase testCase) throws MalformedURLException {
-        int id = testCase.getId();
-        String url = testCase.getuStory().getUrl();
+    public String executeTestCase(TestCase testCase) {
+        try {
+            int id = testCase.getId();
+            String url = testCase.getuStory().getUrl();
 
-        TestCaseResult tcResult = new TestCaseResult();
-        tcResult.setTestCase(testCase);
+            TestCaseResult tcResult = new TestCaseResult();
+            tcResult.setTestCase(testCase);
 
-        tcResult.setExecutionTime(getDateNow());
+            tcResult.setExecutionTime(getDateNow());
 
-        tcResult.setExecutionInstance( "ins_"+new Date().getTime());
+            tcResult.setExecutionInstance( "ins_"+new Date().getTime());
 
-        tcResult = executionDBH.createTestCaseResult(tcResult);
+            openChrome(url);
 
-        openChrome(url);
+            tcResult = executionDBH.createTestCaseResult(tcResult);
 
-        String resultScreenshot = executeTestSteps(id, tcResult);
-        tcResult.setScreenshot(resultScreenshot);
-        if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
-            tcResult.setResult("PASS");
-        } else {
-            tcResult.setResult("FAIL");
+            String resultScreenshot = executeTestSteps(id, tcResult);
+            tcResult.setScreenshot(resultScreenshot);
+            if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
+                tcResult.setResult("PASS");
+            } else {
+                tcResult.setResult("FAIL");
+            }
+            if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
+                tcResult.setStatus("PASS");
+            } else {
+                tcResult.setStatus("FAIL");
+            }
+            executionDBH.updateTestCaseResult(tcResult);
+
+            testCase.setLastExecutedDate(getDateNow());
+            executionDBH.updateTestCase(testCase);
+            driver.quit();
+        } catch (Exception e) {
+            driver.quit();
+            return  "failed";
         }
-        if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
-            tcResult.setStatus("PASS");
-        } else {
-            tcResult.setStatus("FAIL");
-        }
-        executionDBH.updateTestCaseResult(tcResult);
-
-        testCase.setLastExecutedDate(getDateNow());
-        executionDBH.updateTestCase(testCase);
-        driver.quit();
-        return "Okayy";
+        return "success";
     }
 
     private String executeTestSteps(int id, TestCaseResult tcResult) {
