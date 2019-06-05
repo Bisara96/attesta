@@ -1,0 +1,1 @@
+cd C:\Program Files (x86)\Google\Chrome\Application\ && chrome --user-data-dir=D:\Documents\IIT\FinalYear\FYP\Implementation\Misc\ChromeProfile2
