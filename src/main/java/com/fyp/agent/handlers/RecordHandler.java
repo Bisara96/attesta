@@ -1,59 +1,69 @@
 package com.fyp.agent.handlers;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.fyp.agent.dbhandlers.RecordDBHandler;
+import com.fyp.agent.dbhandlers.UserStoryDBHandler;
 import com.fyp.agent.models.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fyp.agent.dbhandlers.RecordDBHandler;
-import com.fyp.agent.dbhandlers.UserStoryDBHandler;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+@Component
+@Service
 public class RecordHandler {
 
-    WebDriver driver = null;
-    UserStoryDBHandler ustoryDBH = null;
-    RecordDBHandler recordDBH = null;
-    List<TestStep> testSteps = new ArrayList<TestStep>();
-    List<TestCase> testCases = new ArrayList<TestCase>();
+    @Autowired
+    private Environment env;
 
-    public RecordHandler() {
-        ustoryDBH = new UserStoryDBHandler();
-        recordDBH = new RecordDBHandler();
+    private RecordDBHandler recordDBH;
+
+    private UserStoryDBHandler ustoryDBH;
+
+    private TestCaseHandler testCaseHandler;
+
+    private WebDriver driver = null;
+    private List<TestStep> testSteps = new ArrayList<TestStep>();
+    private List<TestCase> testCases = new ArrayList<TestCase>();
+
+    public RecordHandler(RecordDBHandler recordDBH, UserStoryDBHandler ustoryDBH, TestCaseHandler testCaseHandler) {
+        this.recordDBH = recordDBH;
+        this.ustoryDBH = ustoryDBH;
+        this.testCaseHandler = testCaseHandler;
     }
 
-    public String startRecording(String url, int id) throws MalformedURLException {
+    public String startRecording(String url, int id, String agent) throws MalformedURLException {
 
         recordDBH.dropExisitingMapping(id);
 
         System.out.println("Initializing record of " + id + " at " + url);
 
         final DesiredCapabilities capability = DesiredCapabilities.chrome();
+        String chromeProf = this.getClass().getClassLoader().getResource("chrome/ChromeProfile").getPath();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile");
+        options.addArguments("user-data-dir=C://Projects//AT2//agent//target//classes//chrome//ChromeProfile");
         options.addArguments("--start-maximized");
+        capability.setCapability("applicationName", agent);
         capability.setCapability(ChromeOptions.CAPABILITY, options);
 
-        driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
+        driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
         driver.get(url);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
-        js.executeScript("window.postMessage({ type: 'startRecording', id: " + id + " }, '*');");
+        js.executeScript("window.postMessage({ type: 'startRecording', id: " + id + ", server: 'http://"+env.getProperty("server.address")+":8080' }, '*');");
         // driver.quit();
 
         UserStory story = ustoryDBH.getUserStory(id);
@@ -116,9 +126,8 @@ public class RecordHandler {
                     break;
             }
         }
-//        generateTestCases(storyID, testStepList);
-        TestCaseHandler hand = new TestCaseHandler();
-        hand.generateTestCases(storyID);
+
+        testCaseHandler.generateTestCases(storyID);
         return stepsArray.toString();
 
     }
@@ -133,61 +142,5 @@ public class RecordHandler {
         recordDBH.addUStoryStep(new UserStorySteps(ustory, step));
         return testStepID;
     }
-
-
-
-//	public String executeParsedSteps(int id) throws MalformedURLException {
-//		
-//		UserStory story = ustoryDBH.getUserStory(id);
-//		String url = story.getUrl();
-//		String jsonString = story.getStepsJson();
-//		if(jsonString != null && url != null) {
-//			
-//			Type listType = new TypeToken<List<Step>>(){}.getType();
-//			List<Step> steps = new Gson().fromJson(jsonString, listType);
-//			
-//			final DesiredCapabilities capability = DesiredCapabilities.chrome();
-//			ChromeOptions options = new ChromeOptions();
-//			options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
-//			options.addArguments("--start-maximized");
-//			capability.setCapability(ChromeOptions.CAPABILITY, options);
-//
-//			driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
-//			driver.get(url);
-//			
-//			for (Step step : steps) {
-//				
-//				try {
-//					WebElement element = driver.findElement(By.xpath(step.getXpath()));
-//					if (step.getType().equalsIgnoreCase("click")) {
-//						System.out.println("Executing step : Click on " + step.getXpath());
-//						try {
-//							element.click();
-//						} catch (NoSuchElementException e) {
-//							JavascriptExecutor js = (JavascriptExecutor)driver;
-//							js.executeScript("arguments[0].click();", element);
-//						}
-//					} else if (step.getType().equalsIgnoreCase("type")) {
-//						System.out.println("Executing step : Type "+step.getValue()+" on " + step.getXpath());
-//						element.sendKeys(step.getValue());
-//					} else if (step.getType().equalsIgnoreCase("press")) {
-//						System.out.println("Executing step : Press "+step.getKeycode()+" on " + step.getXpath());
-//						element.sendKeys(getKeyFromkeyCode(step.getKeycode()));
-//					} else if (step.getType().equalsIgnoreCase("select")) {
-//						System.out.println("Executing step : Select "+step.getValue()+" of " + step.getXpath());
-//						Select dropdown = new Select(element);
-//						dropdown.selectByVisibleText(step.getValue());
-//					}
-//				} catch (ElementNotVisibleException e) {
-//					System.out.println("Couldnt find the element!. Step failed, moving onto the next step.");
-//					continue;
-//				}
-//			}
-//			return jsonString;			
-//		} else {
-//			return "Steps not recorded yet";
-//		}
-//
-//	}
 
 }

@@ -1,34 +1,25 @@
 package com.fyp.agent.controllers;
 
-import java.net.MalformedURLException;
-
+import com.fyp.agent.handlers.RecordHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import com.fyp.agent.handlers.RecordHandler;
+import java.net.MalformedURLException;
 
 @RestController
 @CrossOrigin(maxAge = 3600)
 @RequestMapping("/record")
 public class RecordController {
-	
-	RecordHandler handler = null;
-	
-	public RecordController() {
-		handler = new RecordHandler();
-	}
+
+	@Autowired
+	private RecordHandler handler;
 	
 	@GetMapping("/start")
-	private String start(@RequestParam(name="url", required=true, defaultValue="https://mail.google.com") String url, @RequestParam(name="id", required=true, defaultValue="1") int id) {
+	private String start(@RequestParam(name="url", required=true, defaultValue="https://mail.google.com") String url, @RequestParam(name="id", required=true, defaultValue="1") int id, @RequestParam(name="agent", required=true, defaultValue="default") String agent) {
 		try {
-			return handler.startRecording(url,id);
+			return handler.startRecording(url, id, agent);
 		} catch (MalformedURLException e) {
 			return e.getMessage();
 		}
@@ -49,27 +40,4 @@ public class RecordController {
     private Boolean getStatus(@RequestParam(name="id", required=true, defaultValue="1") int id) {
         return handler.checkStatus(id);
     }
-	
-//	@GetMapping("/play")
-//	private String play(@RequestParam(name="id", required=true, defaultValue="1") int id) {
-//	    try {
-//			return handler.executeParsedSteps(id);
-//		} catch (MalformedURLException e) {
-//			return e.toString();
-//		}
-//	}
-
 }
-
-//class RecordedRawStep {
-//	String type;
-//	String value;
-//	UIObject UIObject;
-//	String time;
-//	String screenshot;
-//}
-//
-//class Recording {
-//    int id;
-//    List <RecordedRawStep> steps;
-//}

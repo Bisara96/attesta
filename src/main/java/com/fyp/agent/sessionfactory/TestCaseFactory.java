@@ -1,7 +1,6 @@
 package com.fyp.agent.sessionfactory;
 
 import com.fyp.agent.models.TestCase;
-import com.fyp.agent.models.TestCaseSteps;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 

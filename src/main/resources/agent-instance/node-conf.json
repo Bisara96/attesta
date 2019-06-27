@@ -1,0 +1,1 @@
+{"agentType":"executor","db_id":6,"capabilities":[{"browserName":"chrome","maxInstances":"3","version":"","platform":"WINDOWS","applicationName":"agent3"}],"hub":"http://192.168.8.101:4444","server_address":"http://192.168.8.101:8080"}

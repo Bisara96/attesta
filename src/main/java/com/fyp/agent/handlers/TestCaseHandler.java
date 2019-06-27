@@ -4,35 +4,39 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fyp.agent.dbhandlers.TestCaseDBHandler;
 import com.fyp.agent.dbhandlers.UserStoryDBHandler;
 import com.fyp.agent.models.*;
-import com.fyp.agent.sessionfactory.TestCaseStepsFactory;
 import com.fyp.agent.utilities.WordsToNumbersUtil;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
+@Service
 public class TestCaseHandler {
 
-    TestCaseDBHandler testCaseDBH;
-    UserStoryDBHandler uDBHandler;
+    @Autowired
+    private Environment env;
 
-    public TestCaseHandler() {
+    private TestCaseDBHandler testCaseDBH;
 
-        testCaseDBH = new TestCaseDBHandler();
-        uDBHandler = new UserStoryDBHandler();
+    private UserStoryDBHandler ustoryDBH;
+
+    public TestCaseHandler(TestCaseDBHandler testCaseDBH, UserStoryDBHandler ustoryDBH) {
+        this.testCaseDBH = testCaseDBH;
+        this.ustoryDBH = ustoryDBH;
     }
 
     public List<TestCase> getStoryTestCases(int id){
@@ -68,7 +72,7 @@ public class TestCaseHandler {
     }
 
     public String generateTestCases(int id) {
-        UserStory story = uDBHandler.getUserStory(id);
+        UserStory story = ustoryDBH.getUserStory(id);
         List<TestStep> testSteps = testCaseDBH.getStorySteps(id);
         List<AcceptanceCriteria> acList = testCaseDBH.getStoryACriteria(id);
         String[] rulesList = getRulesOfAcceptanceCriteria(acList);
@@ -229,7 +233,7 @@ public class TestCaseHandler {
 
         try {
 
-            HttpPost request = new HttpPost("http://127.0.0.1:5000/predict");
+            HttpPost request = new HttpPost("http://"+env.getProperty("server.address")+":5000/predict");
             StringEntity requestEntity = new StringEntity(
                     array.toString(),
                     ContentType.APPLICATION_JSON);
@@ -303,7 +307,7 @@ public class TestCaseHandler {
 
         try {
 
-            HttpPost request = new HttpPost("http://127.0.0.1:5000/nlp/get_elements");
+            HttpPost request = new HttpPost("http://"+env.getProperty("server.address")+":5000/nlp/get_elements");
 //            StringEntity params = new StringEntity(criteria);
             StringEntity requestEntity = new StringEntity(
                     array.toString(),

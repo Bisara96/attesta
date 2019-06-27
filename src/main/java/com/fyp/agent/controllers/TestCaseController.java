@@ -4,6 +4,7 @@ import com.fyp.agent.handlers.TestCaseHandler;
 import com.fyp.agent.models.TestCase;
 import com.fyp.agent.models.TestCaseResult;
 import com.fyp.agent.models.TestCaseSteps;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,11 +14,8 @@ import java.util.List;
 @RequestMapping("/testcase")
 public class TestCaseController {
 
+    @Autowired
     private TestCaseHandler handler;
-
-    public TestCaseController() {
-        handler = new TestCaseHandler();
-    }
 
     @GetMapping("/generate")
     private String generate(@RequestParam(name="id", required=true, defaultValue="1") int id) {

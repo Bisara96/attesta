@@ -26,7 +26,8 @@
     <mapping class="com.fyp.agent.models.Sprint" />
     <mapping class="com.fyp.agent.models.TestCaseResult" />
     <mapping class="com.fyp.agent.models.TestStepResult" />
-
+    <mapping class="com.fyp.agent.models.Agent" />
+    <mapping class="com.fyp.agent.models.StoryAgent" />
      
   </session-factory>
 </hibernate-configuration>

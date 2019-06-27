@@ -1,7 +1,5 @@
 package com.fyp.agent.sessionfactory;
 
-import com.fyp.agent.models.AcceptanceCriteria;
-import com.fyp.agent.models.TestStep;
 import com.fyp.agent.models.UserStorySteps;
 import org.hibernate.Session;
 import org.hibernate.query.Query;

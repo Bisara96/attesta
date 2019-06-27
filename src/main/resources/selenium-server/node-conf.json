@@ -1,0 +1,17 @@
+{
+  "capabilities": [
+    {
+      "browserName": "chrome",
+      "maxInstances": 3,
+      "version": "",
+      "platform": "WINDOWS",
+      "applicationName": "test",
+      "goog:chromeOptions": {
+        "args": [
+          "--start-maximized",
+          "user-data-dir=C://Projects//AT2//agent//target//classes//chrome//ChromeProfile"
+        ]
+      }
+    }
+  ]
+}

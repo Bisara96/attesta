@@ -1,7 +1,5 @@
 package com.fyp.agent.dbhandlers;
 
-import java.util.List;
-
 import com.fyp.agent.models.AcceptanceCriteria;
 import com.fyp.agent.models.Project;
 import com.fyp.agent.models.Sprint;
@@ -10,7 +8,13 @@ import com.fyp.agent.sessionfactory.AcceptanceCriteriaFactory;
 import com.fyp.agent.sessionfactory.ProjectFactory;
 import com.fyp.agent.sessionfactory.SprintFactory;
 import com.fyp.agent.sessionfactory.UserStoryFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Component
+@Repository
 public class UserStoryDBHandler {
 	
 	public List<UserStory> getAll() {

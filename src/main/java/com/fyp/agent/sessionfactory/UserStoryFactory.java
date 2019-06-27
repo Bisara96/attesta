@@ -1,16 +1,10 @@
 package com.fyp.agent.sessionfactory;
 
-import java.util.List;
-
-import com.fyp.agent.models.Sprint;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-
 import com.fyp.agent.models.UserStory;
+import org.hibernate.Session;
 import org.hibernate.query.Query;
+
+import java.util.List;
 
 public class UserStoryFactory extends DBFactory {
 	

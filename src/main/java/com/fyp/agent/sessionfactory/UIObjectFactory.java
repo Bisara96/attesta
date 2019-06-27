@@ -1,10 +1,9 @@
 package com.fyp.agent.sessionfactory;
 
-import java.util.List;
-
+import com.fyp.agent.models.UIObject;
 import org.hibernate.Session;
 
-import com.fyp.agent.models.UIObject;
+import java.util.List;
 
 public class UIObjectFactory extends DBFactory {
 	

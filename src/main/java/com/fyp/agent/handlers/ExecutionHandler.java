@@ -1,7 +1,7 @@
 package com.fyp.agent.handlers;
 
+import com.fyp.agent.dbhandlers.AgentDBHandler;
 import com.fyp.agent.dbhandlers.ExecutionDBHandler;
-import com.fyp.agent.dbhandlers.UserStoryDBHandler;
 import com.fyp.agent.models.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,6 +17,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.Select;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,15 +29,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+@Component
+@Service
 public class ExecutionHandler {
 
-    WebDriver driver = null;
-    ExecutionDBHandler executionDBH;
-    UserStoryDBHandler ustoryDBH;
+    @Autowired
+    private Environment env;
 
-    public ExecutionHandler() {
-        executionDBH = new ExecutionDBHandler();
-        ustoryDBH = new UserStoryDBHandler();
+    private ExecutionDBHandler executionDBH;
+
+    private AgentDBHandler agentDBH;
+
+    private TestCaseResult tcResult;
+
+    public ExecutionHandler(ExecutionDBHandler executionDBH, AgentDBHandler agentDBH) {
+        this.executionDBH = executionDBH;
+        this.agentDBH = agentDBH;
     }
 
     public String executeStory(int id) throws MalformedURLException {
@@ -42,17 +53,6 @@ public class ExecutionHandler {
             executeTestCase(tc);
         }
         return "excuted";
-    }
-
-    public void openChrome(String url) throws MalformedURLException {
-        final DesiredCapabilities capability = DesiredCapabilities.chrome();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
-        options.addArguments("--start-maximized");
-        capability.setCapability(ChromeOptions.CAPABILITY, options);
-
-        driver = new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capability);
-        driver.get(url);
     }
 
     public String getTestCaseToExecute(int id) throws MalformedURLException {
@@ -68,47 +68,106 @@ public class ExecutionHandler {
         return dateFormat.format(date);
     }
 
+    private List<Agent> getAssignedAgents(int storyID) {
+        return agentDBH.getAssignedAgents(storyID);
+    }
+
     public String executeTestCase(TestCase testCase) {
         try {
             int id = testCase.getId();
             String url = testCase.getuStory().getUrl();
 
-            TestCaseResult tcResult = new TestCaseResult();
+            tcResult = new TestCaseResult();
             tcResult.setTestCase(testCase);
 
             tcResult.setExecutionTime(getDateNow());
 
             tcResult.setExecutionInstance( "ins_"+new Date().getTime());
 
-            openChrome(url);
+            List<Agent> agents = agentDBH.getAssignedAgents(testCase.getuStory().getId());
 
-            tcResult = executionDBH.createTestCaseResult(tcResult);
+            for(int i = 0; i < agents.size();i++){
+                if(agents.get(i).getAlive()){
+                    Agent currAgent = agents.get(i);
+                    final DesiredCapabilities capability = DesiredCapabilities.chrome();
+                    ChromeOptions options = new ChromeOptions();
+                    options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
+                    options.addArguments("--start-maximized");
+                    capability.setCapability("applicationName", currAgent.getName());
+                    capability.setCapability(ChromeOptions.CAPABILITY, options);
 
-            String resultScreenshot = executeTestSteps(id, tcResult);
-            tcResult.setScreenshot(resultScreenshot);
-            if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
-                tcResult.setResult("PASS");
-            } else {
-                tcResult.setResult("FAIL");
+                    WebDriver driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
+                    driver.get(url);
+
+                    tcResult = executionDBH.createTestCaseResult(tcResult);
+
+                    String resultScreenshot = executeTestSteps(id, tcResult, driver);
+                    tcResult.setScreenshot(resultScreenshot);
+                    if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
+                        tcResult.setResult("PASS");
+                    } else {
+                        tcResult.setResult("FAIL");
+                    }
+                    if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
+                        tcResult.setStatus("PASS");
+                    } else {
+                        tcResult.setStatus("FAIL");
+                    }
+                    executionDBH.updateTestCaseResult(tcResult);
+
+                    testCase.setLastExecutedDate(getDateNow());
+                    executionDBH.updateTestCase(testCase);
+                    driver.quit();
+
+//                    new Thread(new Runnable() {
+//                        Agent agent = currAgent;
+//                        public void run() {
+//                            try {
+//                                final DesiredCapabilities capability = DesiredCapabilities.chrome();
+//                                ChromeOptions options = new ChromeOptions();
+//                                options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
+//                                options.addArguments("--start-maximized");
+//                                capability.setCapability("applicationName", agent.getName());
+//                                capability.setCapability(ChromeOptions.CAPABILITY, options);
+//
+//                                WebDriver driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
+//                                driver.get(url);
+//
+//                                tcResult = executionDBH.createTestCaseResult(tcResult);
+//
+//                                String resultScreenshot = executeTestSteps(id, tcResult, driver);
+//                                tcResult.setScreenshot(resultScreenshot);
+//                                if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
+//                                    tcResult.setResult("PASS");
+//                                } else {
+//                                    tcResult.setResult("FAIL");
+//                                }
+//                                if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
+//                                    tcResult.setStatus("PASS");
+//                                } else {
+//                                    tcResult.setStatus("FAIL");
+//                                }
+//                                executionDBH.updateTestCaseResult(tcResult);
+//
+//                                testCase.setLastExecutedDate(getDateNow());
+//                                executionDBH.updateTestCase(testCase);
+//                                driver.quit();
+//                            } catch (MalformedURLException e) {
+//                                e.printStackTrace();
+//                            }
+//                            return;
+//                        }
+//                    }).start();
+                }
             }
-            if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
-                tcResult.setStatus("PASS");
-            } else {
-                tcResult.setStatus("FAIL");
-            }
-            executionDBH.updateTestCaseResult(tcResult);
-
-            testCase.setLastExecutedDate(getDateNow());
-            executionDBH.updateTestCase(testCase);
-            driver.quit();
         } catch (Exception e) {
-            driver.quit();
+//            driver.quit();
             return  "failed";
         }
         return "success";
     }
 
-    private String executeTestSteps(int id, TestCaseResult tcResult) {
+    private String executeTestSteps(int id, TestCaseResult tcResult, WebDriver driver) {
         List<TestCaseSteps> tcSteps = executionDBH.getTestCaseSteps(id);
         String lastScreenShot = "";
         for (TestCaseSteps st : tcSteps) {
@@ -171,7 +230,7 @@ public class ExecutionHandler {
 
         try {
 
-            HttpPost request = new HttpPost("http://127.0.0.1:5000/compare_images");
+            HttpPost request = new HttpPost("http://"+env.getProperty("server.address")+":5000/compare_images");
             StringEntity requestEntity = new StringEntity(
                     array.toString(),
                     ContentType.APPLICATION_JSON);

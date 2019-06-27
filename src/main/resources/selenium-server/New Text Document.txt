@@ -1,9 +1,17 @@
 node
 
-java -Dwebdriver.chrome.driver="D:\Documents\IIT\FinalYear\FYP\Implementation\Libraries\selenium-server\chromedriver.exe" -jar selenium-server-standalone-2.53.0.jar -role webdriver -hub http://192.168.56.1:4444/grid/register/
-
+java -Dwebdriver.chrome.driver="C:\Projects\AT2\agent\src\main\resources\selenium-server\chromedriver.exe" -jar selenium-server-standalone-2.53.0.jar -role webdriver -hub http://192.168.8.100:4444/grid/register/ -nodeConfig node-conf.json
 
 hub
 
 java -jar selenium-server-standalone-2.53.0.jar -role hub
+
+
+node
+
+java -Dwebdriver.chrome.driver="C:\Projects\AT2\agent\src\main\resources\selenium-server\chromedriver.exe" -jar selenium-server-standalone-3.141.59.jar -role node -nodeConfig node-conf.json
+
+hub
+
+java -jar selenium-server-standalone-3.141.59.jar -role hub
 

@@ -1,11 +1,10 @@
 package com.fyp.agent.sessionfactory;
 
-import java.util.List;
-
+import com.fyp.agent.models.AcceptanceCriteria;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-import com.fyp.agent.models.AcceptanceCriteria;
+import java.util.List;
 
 public class AcceptanceCriteriaFactory extends DBFactory {
 

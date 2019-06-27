@@ -1,7 +1,6 @@
 package com.fyp.agent.sessionfactory;
 
 import com.fyp.agent.models.Sprint;
-import com.fyp.agent.models.UserStorySteps;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 

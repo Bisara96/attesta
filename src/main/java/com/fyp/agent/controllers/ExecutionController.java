@@ -1,6 +1,7 @@
 package com.fyp.agent.controllers;
 
 import com.fyp.agent.handlers.ExecutionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
@@ -10,11 +11,8 @@ import java.net.MalformedURLException;
 @RequestMapping("/execute")
 public class ExecutionController {
 
-    ExecutionHandler handler;
-
-    public ExecutionController() {
-        handler = new ExecutionHandler();
-    }
+    @Autowired
+    private ExecutionHandler handler;
 
     @GetMapping("/execute_tc")
     private String excuteTestCase(@RequestParam(name="id", required=true, defaultValue="1") int id) {

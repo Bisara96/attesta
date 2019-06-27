@@ -1,14 +1,18 @@
 package com.fyp.agent.dbhandlers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fyp.agent.models.*;
-import com.fyp.agent.sessionfactory.AcceptanceCriteriaFactory;
+import com.fyp.agent.models.TestStep;
+import com.fyp.agent.models.UIObject;
+import com.fyp.agent.models.UserStorySteps;
 import com.fyp.agent.sessionfactory.TestStepFactory;
 import com.fyp.agent.sessionfactory.UIObjectFactory;
 import com.fyp.agent.sessionfactory.UStoryStepFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Component
+@Repository
 public class RecordDBHandler {
 	
 	public int addUIObject(UIObject uObj) {

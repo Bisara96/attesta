@@ -2,10 +2,14 @@ package com.fyp.agent.dbhandlers;
 
 import com.fyp.agent.models.*;
 import com.fyp.agent.sessionfactory.*;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Repository
 public class TestCaseDBHandler {
 
     public List<AcceptanceCriteria> getStoryACriteria(int userStoryID) {

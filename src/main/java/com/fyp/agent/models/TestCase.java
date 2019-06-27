@@ -1,7 +1,6 @@
 package com.fyp.agent.models;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "testcase")
