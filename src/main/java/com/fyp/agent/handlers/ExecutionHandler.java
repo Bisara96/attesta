@@ -40,7 +40,7 @@ public class ExecutionHandler {
 
     private AgentDBHandler agentDBH;
 
-    private TestCaseResult tcResult;
+    private WebDriver driver;
 
     public ExecutionHandler(ExecutionDBHandler executionDBH, AgentDBHandler agentDBH) {
         this.executionDBH = executionDBH;
@@ -73,97 +73,60 @@ public class ExecutionHandler {
     }
 
     public String executeTestCase(TestCase testCase) {
-        try {
             int id = testCase.getId();
             String url = testCase.getuStory().getUrl();
-
-            tcResult = new TestCaseResult();
-            tcResult.setTestCase(testCase);
-
-            tcResult.setExecutionTime(getDateNow());
-
-            tcResult.setExecutionInstance( "ins_"+new Date().getTime());
 
             List<Agent> agents = agentDBH.getAssignedAgents(testCase.getuStory().getId());
 
             for(int i = 0; i < agents.size();i++){
                 if(agents.get(i).getAlive()){
-                    Agent currAgent = agents.get(i);
-                    final DesiredCapabilities capability = DesiredCapabilities.chrome();
-                    ChromeOptions options = new ChromeOptions();
-                    options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
-                    options.addArguments("--start-maximized");
-                    capability.setCapability("applicationName", currAgent.getName());
-                    capability.setCapability(ChromeOptions.CAPABILITY, options);
+                    try {
+                        Agent currAgent = agents.get(i);
 
-                    WebDriver driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
-                    driver.get(url);
+                        TestCaseResult tcResult = new TestCaseResult();
+                        tcResult.setTestCase(testCase);
 
-                    tcResult = executionDBH.createTestCaseResult(tcResult);
+                        tcResult.setExecutionTime(getDateNow());
 
-                    String resultScreenshot = executeTestSteps(id, tcResult, driver);
-                    tcResult.setScreenshot(resultScreenshot);
-                    if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
-                        tcResult.setResult("PASS");
-                    } else {
-                        tcResult.setResult("FAIL");
+                        tcResult.setExecutionInstance( "ins_"+new Date().getTime());
+
+                        tcResult.setAgent(currAgent);
+
+                        final DesiredCapabilities capability = DesiredCapabilities.chrome();
+                        ChromeOptions options = new ChromeOptions();
+                        options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
+                        options.addArguments("--start-maximized");
+                        capability.setCapability("applicationName", currAgent.getName());
+                        capability.setCapability(ChromeOptions.CAPABILITY, options);
+
+                        driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
+                        driver.get(url);
+
+                        tcResult = executionDBH.createTestCaseResult(tcResult);
+
+                        String resultScreenshot = executeTestSteps(id, tcResult, driver);
+                        tcResult.setScreenshot(resultScreenshot);
+                        if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
+                            tcResult.setResult("PASS");
+                        } else {
+                            tcResult.setResult("FAIL");
+                        }
+                        if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
+                            tcResult.setStatus("PASS");
+                        } else {
+                            tcResult.setStatus("FAIL");
+                        }
+                        executionDBH.updateTestCaseResult(tcResult);
+
+                        testCase.setLastExecutedDate(getDateNow());
+                        executionDBH.updateTestCase(testCase);
+                    } catch (MalformedURLException e) {
+                        continue;
+                    } finally {
+                        driver.quit();
                     }
-                    if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
-                        tcResult.setStatus("PASS");
-                    } else {
-                        tcResult.setStatus("FAIL");
-                    }
-                    executionDBH.updateTestCaseResult(tcResult);
-
-                    testCase.setLastExecutedDate(getDateNow());
-                    executionDBH.updateTestCase(testCase);
-                    driver.quit();
-
-//                    new Thread(new Runnable() {
-//                        Agent agent = currAgent;
-//                        public void run() {
-//                            try {
-//                                final DesiredCapabilities capability = DesiredCapabilities.chrome();
-//                                ChromeOptions options = new ChromeOptions();
-//                                options.addArguments("user-data-dir=D:\\Documents\\IIT\\FinalYear\\FYP\\Implementation\\Misc\\ChromeProfile2");
-//                                options.addArguments("--start-maximized");
-//                                capability.setCapability("applicationName", agent.getName());
-//                                capability.setCapability(ChromeOptions.CAPABILITY, options);
-//
-//                                WebDriver driver = new RemoteWebDriver(new URL("http://"+env.getProperty("server.address")+":4444/wd/hub"), capability);
-//                                driver.get(url);
-//
-//                                tcResult = executionDBH.createTestCaseResult(tcResult);
-//
-//                                String resultScreenshot = executeTestSteps(id, tcResult, driver);
-//                                tcResult.setScreenshot(resultScreenshot);
-//                                if(compareImages(testCase.getScreenshot(),resultScreenshot) >= 80){
-//                                    tcResult.setResult("PASS");
-//                                } else {
-//                                    tcResult.setResult("FAIL");
-//                                }
-//                                if(tcResult.getResult().equalsIgnoreCase(testCase.getExpectedResult())){
-//                                    tcResult.setStatus("PASS");
-//                                } else {
-//                                    tcResult.setStatus("FAIL");
-//                                }
-//                                executionDBH.updateTestCaseResult(tcResult);
-//
-//                                testCase.setLastExecutedDate(getDateNow());
-//                                executionDBH.updateTestCase(testCase);
-//                                driver.quit();
-//                            } catch (MalformedURLException e) {
-//                                e.printStackTrace();
-//                            }
-//                            return;
-//                        }
-//                    }).start();
                 }
             }
-        } catch (Exception e) {
-//            driver.quit();
-            return  "failed";
-        }
         return "success";
     }
 

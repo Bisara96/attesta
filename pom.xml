@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.iit.fyp</groupId>
-	<artifactId>agent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>agent</name>
-	<description>Demo project for Spring Boot</description>
+	<artifactId>attest</artifactId>
+	<version>0.0.1</version>
+	<name>attest-backend</name>
+	<description>Attest Backend</description>
 
 	<properties>
 		<java.version>1.8</java.version>

@@ -29,8 +29,6 @@ public class RecordController {
 	private String generateStepsJson(@RequestBody String jsonResponse) {
 	    try {
 			return handler.parseSteps(new JSONObject(jsonResponse));
-		} catch (MalformedURLException e) {
-			return e.getMessage();
 		} catch (JSONException e) {
 			return e.getMessage();
 		}

@@ -20,6 +20,10 @@ public class TestCaseResult {
     private String executionInstance;
     private String status;
 
+    @ManyToOne
+    @JoinColumn(name = "agent_id", nullable = false)
+    private Agent agent;
+
     public TestCaseResult() {
     }
 
@@ -83,5 +87,13 @@ public class TestCaseResult {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 }

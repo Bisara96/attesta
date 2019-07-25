@@ -72,7 +72,7 @@ public class RecordHandler {
         return "Recording " + id + " at " + url;
     }
 
-    public String parseSteps(JSONObject json) throws MalformedURLException, JSONException {
+    public String parseSteps(JSONObject json) throws JSONException{
 		driver.quit();
         int storyID = json.getInt("id");
         UserStory story = ustoryDBH.getUserStory(storyID);
@@ -96,6 +96,10 @@ public class RecordHandler {
             uiObj.setId(recordDBH.addUIObject(uiObj));
 
             TestStepTypes type = TestStepTypes.valueOf(step.getString("type").toUpperCase());
+
+            if(!step.has("screenshot")) {
+                step.put("screenshot", "");
+            }
 
             switch (type) {
                 case TYPE:
